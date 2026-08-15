@@ -1,6 +1,0 @@
-def speak(audio):
-    engine.say(audio)
-    print(audio)
-    engine.runAndWait()
-    engine.stop()
-    
