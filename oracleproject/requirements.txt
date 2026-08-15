@@ -1,0 +1,16 @@
+PyQt6
+pyttsx3
+SpeechRecognition
+requests
+psutil
+pyautogui
+wikipedia
+pywhatkit
+pyjokes
+screen-brightness-control
+python-dotenv
+google-genai
+AppOpener
+python-dateutil
+dateparser
+PyAudio

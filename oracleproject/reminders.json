@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "text": "I have to wake up",
+    "datetime": "2026-08-15 07:00",
+    "done": false
+  },
+  {
+    "id": 2,
+    "text": "internship",
+    "datetime": "2026-08-17 18:00",
+    "done": false
+  }
+]
