@@ -94,15 +94,20 @@ oracleproject/
 
 ## Features
 
-- 🎙️ Wake-word activated, continuous listening, graceful sleep on "bye"
-- 🤖 Gemini-powered fallback for open-ended conversation
-- ⏰ Voice-set alarm that loops until stopped by voice
-- 📝 Persistent reminders
-- 🖥️ Opens any installed app, Notepad, CMD, camera
-- 🌐 Wikipedia, live weather, news, IP/location lookups
-- 💬 Sends WhatsApp messages by voice
-- 📊 Battery, brightness, and volume control
-- 🌀 Animated 3D geodesic wireframe sphere UI with particle field
+
+🎙️ Wake-word activated, continuous listening, graceful sleep on "bye" (no process kill, resumes on next wake word)
+🤖 Gemini-powered fallback for open-ended conversation — not just a fixed command list
+⏰ Voice-set alarm with a looping alert that only stops when you say "stop"
+📝 Persistent reminders, saved to disk across restarts
+🖥️ Opens any installed application by name — no hardcoded app list
+🎵 Plays local music or searches/plays songs on YouTube by voice
+🌐 Live weather, latest news headlines, IP address, and real-time location lookups
+📚 Wikipedia summarization on demand
+💬 Sends WhatsApp messages instantly by voice
+📊 Reports battery %, and adjusts screen brightness and system volume
+📸 Takes screenshots and switches between open windows, hands-free
+😄 Tells jokes and has a bit of personality (it knows who built it)
+🌀 Custom-built animated 3D holographic UI — a real rotating geodesic wireframe sphere (not a static image), rendered with live perspective projection and depth-based shading
 
 ---
 
