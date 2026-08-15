@@ -94,20 +94,31 @@ oracleproject/
 
 ## Features
 
+- 🎙️ Wake-word activated, continuous listening, graceful sleep on "bye" (no process kill, resumes on next wake word)
+- 🤖 Gemini-powered fallback for open-ended conversation — not just a fixed command list
+- ⏰ Voice-set alarm with a looping alert that only stops when you say "stop"
+- 📝 Persistent reminders, saved to disk across restarts
+- 🖥️ Opens **any** installed application by name — no hardcoded app list
+- 🎵 Plays local music or searches/plays songs on YouTube by voice
+- 🌐 Live weather, latest news headlines, IP address, and real-time location lookups
+- 📚 Wikipedia summarization on demand
+- 💬 Sends WhatsApp messages instantly by voice
+- 📊 Reports battery %, and adjusts screen brightness and system volume
+- 📸 Takes screenshots and switches between open windows, hands-free
+- 😄 Tells jokes and has a bit of personality (it knows who built it)
+- 🌀 Custom-built animated 3D holographic UI — a real rotating geodesic wireframe sphere (not a static image), rendered with live perspective projection and depth-based shading
 
-🎙️ Wake-word activated, continuous listening, graceful sleep on "bye" (no process kill, resumes on next wake word)
-🤖 Gemini-powered fallback for open-ended conversation — not just a fixed command list
-⏰ Voice-set alarm with a looping alert that only stops when you say "stop"
-📝 Persistent reminders, saved to disk across restarts
-🖥️ Opens any installed application by name — no hardcoded app list
-🎵 Plays local music or searches/plays songs on YouTube by voice
-🌐 Live weather, latest news headlines, IP address, and real-time location lookups
-📚 Wikipedia summarization on demand
-💬 Sends WhatsApp messages instantly by voice
-📊 Reports battery %, and adjusts screen brightness and system volume
-📸 Takes screenshots and switches between open windows, hands-free
-😄 Tells jokes and has a bit of personality (it knows who built it)
-🌀 Custom-built animated 3D holographic UI — a real rotating geodesic wireframe sphere (not a static image), rendered with live perspective projection and depth-based shading
+---
+
+## What This Project Demonstrates
+
+This isn't just a script that responds to keywords — it's an exploration of how far a rule-based + LLM-hybrid architecture can go before needing a full agent framework:
+
+- **Deterministic-first, AI-assisted fallback**: fast, predictable commands (alarms, system control) never touch the LLM; only genuinely open-ended queries get routed to Gemini. This keeps latency low and behavior reliable where it matters most.
+- **Real concurrency, not just async syntax**: the voice loop and the animated UI run on separate threads simultaneously, with Qt's GUI thread requirements respected — a common gotcha that silently breaks a lot of PyQt + threading projects.
+- **From-scratch 3D rendering**: the core sphere isn't an image or a canned animation — it's a hand-implemented icosahedron mesh with real rotation matrices and perspective projection, drawn frame-by-frame with `QPainter`.
+- **API key hygiene**: secrets are loaded via `.env` / environment variables, never hardcoded, with `.gitignore` enforced from day one.
+- **Debugging under real constraints**: built while migrating across Python 3.14 → 3.13 due to `pyaudio` wheel availability, and while working around Windows-specific TTS engine quirks (`pyttsx3` + SAPI5 silently dropping repeated calls).
 
 ---
 
@@ -127,6 +138,8 @@ Built by **Shakshi Soni** — Data Science & AI student at IIT Guwahati, explori
 
 📫 **Connect with me:**
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat&logo=linkedin)](https://www.linkedin.com/in/shakshi-soni-961048411/)
+
+
 <div align="center">
 
 **⭐ If you found this project interesting, a star helps a lot.**
