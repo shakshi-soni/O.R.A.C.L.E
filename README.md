@@ -4,7 +4,6 @@ A voice-controlled assistant with wake-word activation, system automation, and a
 
 [![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![PyQt6](https://img.shields.io/badge/PyQt6-UI-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://pypi.org/project/PyQt6/)
-[![Gemini](https://img.shields.io/badge/Gemini-3.5%20Flash-8A2BE2?style=for-the-badge&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
 
 ## What it does
 
