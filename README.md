@@ -1,147 +1,90 @@
-# 🔮 O.R.A.C.L.E
+# O.R.A.C.L.E.
 
-A voice-controlled AI assistant with wake-word activation, system automation, and a real-time animated 3D holographic UI. Built as a personal engineering project exploring agentic voice interfaces.
+A voice-controlled assistant with wake-word activation, system automation, and a custom animated 3D holographic UI. Personal project exploring how far a voice interface can go without a full agent framework.
 
 [![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![PyQt6](https://img.shields.io/badge/PyQt6-UI-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://pypi.org/project/PyQt6/)
 [![Gemini](https://img.shields.io/badge/Gemini-3.5%20Flash-8A2BE2?style=for-the-badge&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
 
----
+## What it does
 
-## Quick Start
+Say a wake word ("wake up", "hello", "hi") and it starts listening. Most commands go through a deterministic router — system control, opening apps, media, weather/news/IP lookups, alarms, reminders, screenshots, volume/brightness — and only genuinely open-ended stuff falls through to Gemini for a conversational response. Say "bye" and it goes quiet without killing the process, ready for the next wake word.
+
+It can open any installed app by name (via `AppOpener`, not a hardcoded list per app), play local music or search YouTube by voice, send WhatsApp messages, set an alarm that loops until you tell it to stop, and hold reminders across restarts since they're written to disk.
+
+The UI is a rotating geodesic wireframe sphere, hand-built with real rotation matrices and perspective projection, drawn frame-by-frame with `QPainter` — not a canned animation or a static asset.
+
+## Architecture
+
+```
+Voice input
+    ↓
+Wake word detection ("wake up" / "hello" / "hi")
+    ↓
+Command router (oracle.py) — matches against known intents
+    ↓
+   ┌──────────┬────────┬───────────┬─────────────┬──────────────┐
+   ↓          ↓        ↓           ↓              ↓
+ system    media    info lookup  utilities    system stats
+ control  (music/                (alarm,      (battery,
+ (apps,    YouTube)  (wiki,       reminders,   brightness,
+ notepad,            weather,     screenshot)  volume)
+ cmd,                news, IP)
+ camera)
+    │
+    ↓ (no match)
+Gemini fallback (ai_brain.py) — open-ended conversation
+    ↓
+Text-to-speech response (pyttsx3 / SAPI5)
+```
+
+## Running it
 
 ```bash
-# 1. Install dependencies
 py -3.13 -m pip install -r requirements.txt
 
-# 2. Set your API keys
-# Create a .env file in the project root:
+# .env file:
 # GEMINI_API_KEY=your_key_here
 # NEWS_API_KEY=your_key_here
 
-# 3. Run it
 py -3.13 oracle.py
 ```
+Launches the voice loop and the UI together.
 
-This launches the voice loop and the holographic UI together.
-
----
-
-## Architecture Overview
-
-```
-Voice Input
-    │
-    ▼
-┌─────────────────────────────────────────┐
-│         WAKE WORD DETECTION              │
-│  "wake up" / "hello" / "hi" → activate   │
-└─────────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────────┐
-│         COMMAND ROUTER (oracle.py)       │
-│  Matches query against known intents     │
-└─────────────────────────────────────────┘
-    │
-    ├── System control  → apps, notepad, cmd, camera
-    ├── Media            → music, YouTube
-    ├── Info lookup       → Wikipedia, weather, news, IP
-    ├── Utilities         → alarm, reminders, screenshot
-    ├── System stats      → battery, brightness, volume
-    │
-    ▼ (no match)
-┌─────────────────────────────────────────┐
-│         GEMINI FALLBACK (ai_brain.py)    │
-│  Open-ended conversational response      │
-└─────────────────────────────────────────┘
-    │
-    ▼
-Text-to-Speech Response (pyttsx3 / SAPI5)
-    │
-    ▼
-"bye" → sleeps quietly, waits for wake word again
-```
-
----
-
-## Project Structure
+## Project structure
 
 ```
 oracleproject/
-├── oracle.py              # Main entry point — voice loop & command routing
-├── AI_intergration.py     # Gemini API wrapper & system prompt
-├── oracle_ui.py           # PyQt6 holographic UI (runs on main thread)
-├── MyAlarm.py             # Voice-controlled looping alarm
-├── Reminders.py           # Reminder creation & retrieval
-├── reminders.json         # Persisted reminder storage
+├── oracle.py              # main entry point — voice loop & routing
+├── AI_intergration.py     # Gemini wrapper & system prompt
+├── oracle_ui.py           # PyQt6 holographic UI (main thread)
+├── MyAlarm.py             # voice-controlled looping alarm
+├── Reminders.py           # reminder creation & retrieval
+├── reminders.json         # persisted reminder storage
 ├── requirements.txt
-└── .env                   # API keys (gitignored)
+└── .env                   # gitignored
 ```
 
----
+## Things I had to actually debug my way through
 
-## Key Design Decisions
+- `pyttsx3` silently drops audio if you reuse the same engine instance across repeated `speak()` calls — fixed by spinning up a fresh engine per call. Took a while to figure out because it fails silently, no exception.
+- Qt needs the main thread on Windows, so the voice loop runs in the background and the UI stays on the main thread — got this backwards at first and ended up with invisible/broken windows.
+- Migrated from Python 3.14 down to 3.13 partway through because `pyaudio` didn't have wheels for 3.14 yet at the time.
+- Gemini is a fallback, not the router — deterministic commands (alarms, system control) never touch the LLM, so they stay fast and predictable. Only open-ended queries hit Gemini. This was a deliberate choice after an earlier version routed everything through the LLM and got noticeably slower and less predictable.
 
-| Decision | Rationale |
-|---|---|
-| Fresh `pyttsx3` engine per `speak()` call | SAPI5 silently drops audio on repeated calls from a reused engine instance — reinit avoids this |
-| UI on main thread, voice loop on background thread | Qt's GUI must own the main thread on Windows; running it in the background caused invisible/broken windows |
-| `AppOpener` for generic "open X" | Avoids hardcoding one `elif` per application — opens any installed app by name |
-| Gemini as fallback, not primary router | Keeps deterministic commands (alarms, system control) fast and predictable; LLM only handles open-ended queries |
+## Limitations
 
----
+- Windows-only — `pyttsx3`/SAPI5, `winsound`, and `screen_brightness_control` are all Windows-specific
+- No conversation memory across sessions, each session starts fresh
+- Weather/IP/news lookups depend on third-party API uptime, no fallback if they're down
+- Single-user, single-process, wasn't built with multi-session use in mind
 
-## Features
+## Why I built this
 
-- 🎙️ Wake-word activated, continuous listening, graceful sleep on "bye" (no process kill, resumes on next wake word)
-- 🤖 Gemini-powered fallback for open-ended conversation — not just a fixed command list
-- ⏰ Voice-set alarm with a looping alert that only stops when you say "stop"
-- 📝 Persistent reminders, saved to disk across restarts
-- 🖥️ Opens **any** installed application by name — no hardcoded app list
-- 🎵 Plays local music or searches/plays songs on YouTube by voice
-- 🌐 Live weather, latest news headlines, IP address, and real-time location lookups
-- 📚 Wikipedia summarization on demand
-- 💬 Sends WhatsApp messages instantly by voice
-- 📊 Reports battery %, and adjusts screen brightness and system volume
-- 📸 Takes screenshots and switches between open windows, hands-free
-- 😄 Tells jokes and has a bit of personality (it knows who built it)
-- 🌀 Custom-built animated 3D holographic UI — a real rotating geodesic wireframe sphere (not a static image), rendered with live perspective projection and depth-based shading
+I wanted to see how far I could get with a hybrid approach — deterministic routing for anything time-sensitive or safety-relevant (alarms, opening apps, system control), and an LLM only for the parts that actually need open-ended reasoning — instead of routing everything through an LLM by default. The 3D UI wasn't strictly necessary for any of that, I just wanted to build a real rendering pipeline from scratch instead of using a pre-made animation, and it turned out to be one of the more interesting parts of the project.
 
----
+## About
 
-## What This Project Demonstrates
+Shakshi Soni — Data Science & AI student at IIT Guwahati.
 
-This isn't just a script that responds to keywords — it's an exploration of how far a rule-based + LLM-hybrid architecture can go before needing a full agent framework:
-
-- **Deterministic-first, AI-assisted fallback**: fast, predictable commands (alarms, system control) never touch the LLM; only genuinely open-ended queries get routed to Gemini. This keeps latency low and behavior reliable where it matters most.
-- **Real concurrency, not just async syntax**: the voice loop and the animated UI run on separate threads simultaneously, with Qt's GUI thread requirements respected — a common gotcha that silently breaks a lot of PyQt + threading projects.
-- **From-scratch 3D rendering**: the core sphere isn't an image or a canned animation — it's a hand-implemented icosahedron mesh with real rotation matrices and perspective projection, drawn frame-by-frame with `QPainter`.
-- **API key hygiene**: secrets are loaded via `.env` / environment variables, never hardcoded, with `.gitignore` enforced from day one.
-- **Debugging under real constraints**: built while migrating across Python 3.14 → 3.13 due to `pyaudio` wheel availability, and while working around Windows-specific TTS engine quirks (`pyttsx3` + SAPI5 silently dropping repeated calls).
-
----
-
-## Known Limitations
-
-- Windows-only (`pyttsx3` SAPI5, `winsound`, `screen_brightness_control`)
-- No persistent conversation memory across sessions
-- Weather/IP lookups depend on third-party API uptime
-- Single-user, single-process — no multi-session support
-
----
-
-## 🙋‍♀️ About the Developer
-
-Built by **Shakshi Soni** — Data Science & AI student at IIT Guwahati, exploring agentic AI systems that combine voice, tool-calling, and real-time UI.
-
-
-📫 **Connect with me:**
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat&logo=linkedin)](https://www.linkedin.com/in/shakshi-soni-961048411/)
-
-
-<div align="center">
-
-**⭐ If you found this project interesting, a star helps a lot.**
-
-</div>
